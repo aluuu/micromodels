@@ -144,3 +144,16 @@ class Model(object):
 
         '''
         return json.dumps(self.to_dict(serial=True))
+
+    def loads(self, data):
+        '''
+        Makes restoring from JSON simplier.
+        '''
+        self.set_data(data, is_json=True)
+        return self
+
+    def dumps(self):
+        '''
+        Alias for :meth:`~micromodels.Model.to_json` method.
+        '''
+        return self.to_json()

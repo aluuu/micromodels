@@ -1,4 +1,8 @@
+import time
 import datetime
+import types
+from mx.DateTime import DateTimeType, DateTimeDeltaType, \
+     DateTimeFromTicks, DateTimeDeltaFromSeconds
 
 class BaseField(object):
     """Base class for all field types.
@@ -300,3 +304,39 @@ class FieldCollectionField(BaseField):
 
     def to_serial(self, list_of_fields):
         return [self._instance.to_serial(data) for data in list_of_fields]
+
+
+class MXDateTimeField(BaseField):
+
+    def to_serial(self, obj):
+        if isinstance(obj, DateTimeType):
+            return long(obj.ticks())
+        elif isinstance(obj, datetime.datetime):
+            return long(time.mktime(obj.timetuple()))
+        else:
+            if isinstance(obj, types.NoneType):
+                return None
+        raise TypeError("Given object is not of type DateTime")
+
+    def to_python(self):
+        if self.data is None:
+            return None
+        return DateTimeFromTicks(self.data)
+
+
+class MXTimeDeltaField(BaseField):
+
+    def to_serial(self, obj):
+        if isinstance(obj, DateTimeDeltaType):
+            return long(obj.seconds)
+        elif isinstance(obj, datetime.timedelta):
+            return long(obj.total_seconds())
+        else:
+            if isinstance(obj, types.NoneType):
+                return None
+        raise TypeError("Given object is not of type DateTimeDelta")
+
+    def to_python(self):
+        if self.data is None:
+            return None
+        return DateTimeDeltaFromSeconds(self.data)

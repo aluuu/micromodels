@@ -28,6 +28,9 @@ setup(
     author='Jamie Matthews',
     author_email='jamie.matthews@gmail.com',
     license='Public Domain',
+    install_requires=[
+        'egenix-mx-base',
+    ],
     classifiers = [
         'Programming Language :: Python',
         'Development Status :: 3 - Alpha',
