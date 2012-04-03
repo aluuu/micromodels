@@ -30,6 +30,7 @@ setup(
     license='Public Domain',
     install_requires=[
         'egenix-mx-base',
+        'python-cjson',
     ],
     classifiers = [
         'Programming Language :: Python',

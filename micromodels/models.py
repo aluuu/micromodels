@@ -1,9 +1,7 @@
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import cjson as json
 
 from .fields import BaseField
+
 
 class Model(object):
     """The Model is the main component of micromodels. Model makes it trivial
@@ -86,7 +84,7 @@ class Model(object):
 
     def set_data(self, data, is_json=False):
         if is_json:
-            data = json.loads(data)
+            data = json.decode(data)
         for name, field in self._clsfields.iteritems():
             key = field.source or name
             if key in data:
@@ -143,7 +141,7 @@ class Model(object):
         relies on the :meth:`~micromodels.Model.to_dict` method.
 
         '''
-        return json.dumps(self.to_dict(serial=True))
+        return json.encode(self.to_dict(serial=True))
 
     def loads(self, data):
         '''
