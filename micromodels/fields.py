@@ -12,8 +12,9 @@ class BaseField(object):
     name as the key to retrieve the value from the source data.
 
     """
-    def __init__(self, source=None):
+    def __init__(self, source=None, default=None):
         self.source = source
+        self.default = default
 
     def populate(self, data):
         """Set the value or values wrapped by this field"""
@@ -181,6 +182,11 @@ class ModelField(WrappedObjectField):
         u'Some nested value'
 
     """
+    def populate(self, data):
+        if isinstance(data, dict):
+            data = self._wrapped_class.from_dict(data)
+        self.data = data
+
     def to_python(self):
         return self._wrapped_class.from_dict(self.data or {})
 
@@ -221,12 +227,20 @@ class ModelCollectionField(WrappedObjectField):
         [u'First value', u'Second value', u'Third value']
 
     """
+    def populate(self, data):
+        new_data = []
+        for obj in data:
+            if isinstance(obj, dict):
+                new_data.append(self._wrapped_class.from_dict(obj))
+            else:
+                new_data.append(obj)
+        self.data = new_data
+
     def to_python(self):
         return [self._wrapped_class.from_dict(item) for item in self.data]
 
     def to_serial(self, model_instances):
         return [instance.to_dict(serial=True) for instance in model_instances]
-
 
 class FieldCollectionField(BaseField):
     """Field containing a list of the same type of fields.
@@ -308,14 +322,23 @@ class FieldCollectionField(BaseField):
 
 class MXDateTimeField(BaseField):
 
+    def populate(self, data):
+        if isinstance(data, int) or isinstance(data, float):
+            self.data = DateTimeFromTicks(data)
+        elif isinstance(data, types.NoneType):
+            self.data = None
+        else:
+            self.data = DateTimeFromTicks(self.to_serial(data))
+
     def to_serial(self, obj):
         if isinstance(obj, DateTimeType):
             return long(obj.ticks())
         elif isinstance(obj, datetime.datetime):
             return long(time.mktime(obj.timetuple()))
-        else:
-            if isinstance(obj, types.NoneType):
-                return None
+        elif isinstance(obj, int) or isinstance(obj, float):
+            return obj
+        elif isinstance(obj, types.NoneType):
+            return None
         raise TypeError("Given object is not of type DateTime")
 
     def to_python(self):
@@ -326,14 +349,22 @@ class MXDateTimeField(BaseField):
 
 class MXTimeDeltaField(BaseField):
 
+    def populate(self, data):
+        serial = self.to_serial(data)
+        if serial:
+            self.data = DateTimeDeltaFromSeconds(serial)
+        else:
+            self.data = None
+
     def to_serial(self, obj):
         if isinstance(obj, DateTimeDeltaType):
             return long(obj.seconds)
         elif isinstance(obj, datetime.timedelta):
             return long(obj.total_seconds())
-        else:
-            if isinstance(obj, types.NoneType):
-                return None
+        elif isinstance(obj, int) or isinstance(obj, float):
+            return obj
+        elif isinstance(obj, types.NoneType):
+            return None
         raise TypeError("Given object is not of type DateTimeDelta")
 
     def to_python(self):

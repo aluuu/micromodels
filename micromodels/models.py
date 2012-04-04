@@ -54,10 +54,13 @@ class Model(object):
             for key, value in attrs.iteritems():
                 if isinstance(value, BaseField):
                     cls._clsfields[key] = value
+                    cls._fields = cls._clsfields
                     delattr(cls, key)
 
     def __init__(self):
         super(Model, self).__setattr__('_extra', {})
+        for name, field in self._clsfields.iteritems():
+            setattr(self, name, field.default)
 
     @classmethod
     def from_dict(cls, D, is_json=False):
@@ -85,6 +88,10 @@ class Model(object):
     def set_data(self, data, is_json=False):
         if is_json:
             data = json.decode(data)
+
+        if isinstance(data, self.__class__):
+            data = data.to_dict()
+
         for name, field in self._clsfields.iteritems():
             key = field.source or name
             if key in data:
@@ -96,20 +103,17 @@ class Model(object):
             try:
                 field.populate(value)
                 super(Model, self).__setattr__(key, field.to_python())
-            except:
+            except Exception, e:
+                raise e
                 try:
+                    print key, value
                     field.to_serial(value)
-                except:
-                    raise TypeError('%s could not be serialized by %s' %\
-                                    (type(value).__name__, type(field).__name__))
+                except Exception, e:
+                    raise e
                 else:
                     super(Model, self).__setattr__(key, value)
         else:
             super(Model, self).__setattr__(key, value)
-
-    @property
-    def _fields(self):
-        return dict(self._clsfields, **self._extra)
 
     def add_field(self, key, value, field):
         ''':meth:`add_field` must be used to add a field to an existing
@@ -148,7 +152,6 @@ class Model(object):
         Makes restoring from JSON simplier.
         '''
         self.set_data(data, is_json=True)
-        return self
 
     def dumps(self):
         '''
