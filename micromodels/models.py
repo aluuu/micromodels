@@ -62,13 +62,20 @@ class Model(object):
         for name, field in self._clsfields.iteritems():
             setattr(self, name, field.default)
 
+    def __eq__(self, other):
+        eq = type(other) == type(self)
+        if eq:
+            for name, field in self._clsfields.iteritems():
+                eq = eq and getattr(self, name) == getattr(other, name)
+        return eq
+
+
     @classmethod
     def from_dict(cls, D, is_json=False):
         '''This factory for :class:`Model`
         takes either a native Python dictionary or a JSON dictionary/object
         if ``is_json`` is ``True``. The dictionary passed does not need to
         contain all of the values that the Model declares.
-
         '''
         instance = cls()
         instance.set_data(D, is_json=is_json)
