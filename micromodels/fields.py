@@ -12,9 +12,10 @@ class BaseField(object):
     name as the key to retrieve the value from the source data.
 
     """
-    def __init__(self, source=None, default=None):
+    def __init__(self, source=None, default=None, null=False):
         self.source = source
         self.default = default
+        self.null = null
 
     def populate(self, data):
         """Set the value or values wrapped by this field"""
@@ -44,18 +45,25 @@ class BaseField(object):
 class CharField(BaseField):
     """Field to represent a simple Unicode string value."""
 
+    empty = ''
+
     def to_python(self):
         """Convert the data supplied using the :meth:`populate` method to a
         Unicode string.
 
         """
         if self.data is None:
-            return ''
+            if self.null:
+                return None
+            else:
+                return self.default or self.empty
         return unicode(self.data)
 
 
 class IntegerField(BaseField):
     """Field to represent an integer value"""
+
+    empty = 0
 
     def to_python(self):
         """Convert the data supplied to the :meth:`populate` method to an
@@ -63,12 +71,17 @@ class IntegerField(BaseField):
 
         """
         if self.data is None:
-            return 0
+            if self.null:
+                return None
+            else:
+                return self.default or self.empty
         return int(self.data)
 
 
 class FloatField(BaseField):
     """Field to represent a floating point value"""
+
+    empty = 0.0
 
     def to_python(self):
         """Convert the data supplied to the :meth:`populate` method to a
@@ -76,7 +89,10 @@ class FloatField(BaseField):
 
         """
         if self.data is None:
-            return 0.0
+            if self.null:
+                return None
+            else:
+                return self.default or self.empty
         return float(self.data)
 
 
