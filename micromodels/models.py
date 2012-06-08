@@ -112,13 +112,6 @@ class Model(object):
                 super(Model, self).__setattr__(key, field.to_python())
             except Exception, e:
                 raise e
-                try:
-                    print key, value
-                    field.to_serial(value)
-                except Exception, e:
-                    raise e
-                else:
-                    super(Model, self).__setattr__(key, value)
         else:
             super(Model, self).__setattr__(key, value)
 

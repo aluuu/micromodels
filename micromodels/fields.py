@@ -19,7 +19,6 @@ class BaseField(object):
 
     def populate(self, data):
         """Set the value or values wrapped by this field"""
-
         self.data = data
 
     def to_python(self):
@@ -203,8 +202,8 @@ class ModelField(WrappedObjectField):
             data = self._wrapped_class.from_dict(data)
         self.data = data
 
-    def to_python(self):
-        return self._wrapped_class.from_dict(self.data or {})
+    # def to_python(self):
+    #     return self._wrapped_class.from_dict(self.data or {})
 
     def to_serial(self, model_instance):
         return model_instance.to_dict(serial=True)
@@ -357,12 +356,6 @@ class MXDateTimeField(BaseField):
             return None
         raise TypeError("Given object is not of type DateTime")
 
-    def to_python(self):
-        if self.data is None:
-            return None
-        return DateTimeFromTicks(self.data)
-
-
 class MXTimeDeltaField(BaseField):
 
     def populate(self, data):
@@ -383,7 +376,3 @@ class MXTimeDeltaField(BaseField):
             return None
         raise TypeError("Given object is not of type DateTimeDelta")
 
-    def to_python(self):
-        if self.data is None:
-            return None
-        return DateTimeDeltaFromSeconds(self.data)
