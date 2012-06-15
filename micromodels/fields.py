@@ -202,8 +202,8 @@ class ModelField(WrappedObjectField):
             data = self._wrapped_class.from_dict(data)
         self.data = data
 
-    # def to_python(self):
-    #     return self._wrapped_class.from_dict(self.data or {})
+    def to_python(self):
+        return self._wrapped_class.from_dict(self.data or {})
 
     def to_serial(self, model_instance):
         return model_instance.to_dict(serial=True)
