@@ -206,7 +206,10 @@ class ModelField(WrappedObjectField):
         return self._wrapped_class.from_dict(self.data or {})
 
     def to_serial(self, model_instance):
-        return model_instance.to_dict(serial=True)
+        try:
+            return model_instance.to_dict(serial=True)
+        except AttributeError:
+            return None
 
 
 class ModelCollectionField(WrappedObjectField):
