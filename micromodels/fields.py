@@ -345,22 +345,26 @@ class MXDateTimeField(BaseField):
             self.data = DateTimeFrom(data)
         elif isinstance(data, types.NoneType):
             self.data = None
+        else:
+            raise TypeError("Cannot cast given value to mx.DateTime type")
 
     def to_serial(self, data):
         if isinstance(data, (int, float, DateTimeType, datetime.datetime, basestring)):
             return DateTimeFrom(data).ticks()
         elif isinstance(data, types.NoneType):
             return None
-            raise TypeError("Cannot cast given value to mx.DateTime type")
+        raise TypeError("Cannot cast given value to mx.DateTime type")
 
 
 class MXTimeDeltaField(BaseField):
 
     def populate(self, data):
         if isinstance(data, (DateTimeDeltaType, datetime.timedelta, int, float)):
-            return DateTimeDeltaFrom(obj)
+            self.data =  DateTimeDeltaFrom(obj)
         elif isinstance(data, types.NoneType):
-            return None
+            self.data = None
+        else:
+            raise TypeError("Cannot cast given value to mx.DateTime type")
 
     def to_serial(self, data):
         if isinstance(data, (int, float, DateTimeDeltaType, datetime.timedelta, basestring)):
