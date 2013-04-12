@@ -360,7 +360,7 @@ class MXTimeDeltaField(BaseField):
 
     def populate(self, data):
         if isinstance(data, (DateTimeDeltaType, datetime.timedelta, int, float)):
-            self.data =  DateTimeDeltaFrom(obj)
+            self.data =  DateTimeDeltaFrom(data)
         elif isinstance(data, types.NoneType):
             self.data = None
         else:
