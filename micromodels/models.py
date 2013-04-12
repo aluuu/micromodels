@@ -102,18 +102,15 @@ class Model(object):
         for name, field in self._clsfields.iteritems():
             key = field.source or name
             if key in data:
-                setattr(self, name, data.get(key))
+                self.__setattr__(name, data.get(key))
 
     def __setattr__(self, key, value):
         if key in self._fields:
             field = self._fields[key]
-            try:
-                field.populate(value)
-                super(Model, self).__setattr__(key, field.to_python())
-            except Exception, e:
-                raise e
+            field.populate(value)
+            self.__dict__[key] = field.to_python()
         else:
-            super(Model, self).__setattr__(key, value)
+            self.__dict__[key] = value
 
     def add_field(self, key, value, field):
         ''':meth:`add_field` must be used to add a field to an existing
@@ -122,9 +119,8 @@ class Model(object):
         reassigned without using this method.
 
         '''
-        self._extra[key] = field
-        setattr(self, key, value)
-
+        self._fields[key] = field
+        self.__setattr__(key, value)
 
     def to_dict(self, serial=False):
         '''A dictionary representing the the data of the class is returned.

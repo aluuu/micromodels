@@ -2,7 +2,7 @@ import time
 import datetime
 import types
 from mx.DateTime import DateTimeType, DateTimeDeltaType, \
-     DateTimeFromTicks, DateTimeDeltaFromSeconds
+     DateTimeFrom, DateTimeDeltaFrom
 
 class BaseField(object):
     """Base class for all field types.
@@ -341,41 +341,25 @@ class FieldCollectionField(BaseField):
 class MXDateTimeField(BaseField):
 
     def populate(self, data):
-        if isinstance(data, int) or isinstance(data, float):
-            self.data = DateTimeFromTicks(data)
+        if isinstance(data, (int, float, DateTimeType, datetime.datetime, basestring)):
+            self.data = DateTimeFrom(data)
         elif isinstance(data, types.NoneType):
             self.data = None
         else:
-            self.data = DateTimeFromTicks(self.to_serial(data))
+            raise TypeError("Cannot cast given value to mx.DateTime type")
 
-    def to_serial(self, obj):
-        if isinstance(obj, DateTimeType):
-            return long(obj.ticks())
-        elif isinstance(obj, datetime.datetime):
-            return long(time.mktime(obj.timetuple()))
-        elif isinstance(obj, int) or isinstance(obj, float):
-            return obj
-        elif isinstance(obj, types.NoneType):
+    def to_serial(self, data):
+        if isinstance(data, (int, float, DateTimeType, datetime.datetime, basestring)):
+            return DateTimeFrom(data).ticks()
+        elif isinstance(data, types.NoneType):
             return None
-        raise TypeError("Given object is not of type DateTime")
+
 
 class MXTimeDeltaField(BaseField):
 
     def populate(self, data):
-        serial = self.to_serial(data)
-        if serial:
-            self.data = DateTimeDeltaFromSeconds(serial)
-        else:
-            self.data = None
-
-    def to_serial(self, obj):
-        if isinstance(obj, DateTimeDeltaType):
-            return long(obj.seconds)
-        elif isinstance(obj, datetime.timedelta):
-            return long(obj.total_seconds())
-        elif isinstance(obj, int) or isinstance(obj, float):
-            return obj
+        if isinstance(obj, (DateTimeDeltaType, datetime.timedelta, int, float)):
+            return DateTimeDeltaFrom(obj)
         elif isinstance(obj, types.NoneType):
             return None
-        raise TypeError("Given object is not of type DateTimeDelta")
-
+        raise TypeError("Cannot cast given value to mx.DateTimeDelta type")
