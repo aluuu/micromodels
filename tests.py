@@ -320,11 +320,11 @@ class ModelTestCase(unittest.TestCase):
     def setUp(self):
         class Person(micromodels.Model):
             name = micromodels.CharField()
-            age = micromodels.IntegerField()
+            age = micromodels.IntegerField(default=0)
 
         self.Person = Person
         self.data = {'name': 'Eric', 'age': 18}
-        self.json_data = json.dumps(self.data)
+        self.json_data = json.encode(self.data)
 
     def test_model_creation(self):
         instance = self.Person.from_dict(self.json_data, is_json=True)
@@ -336,7 +336,7 @@ class ModelTestCase(unittest.TestCase):
         instance = self.Person.from_dict(self.json_data, is_json=True)
         self.assertEqual(instance.to_json(), self.json_data)
         instance.name = 'John'
-        self.assertEqual(json.loads(instance.to_json())['name'],
+        self.assertEqual(json.decode(instance.to_json())['name'],
                          'John')
 
     def test_model_type_change_serialization(self):
@@ -344,12 +344,12 @@ class ModelTestCase(unittest.TestCase):
             time = micromodels.DateField(format="%Y-%m-%d")
 
         data = {'time': '2000-10-31'}
-        json_data = json.dumps(data)
+        json_data = json.encode(data)
 
         instance = Event.from_dict(json_data, is_json=True)
         output = instance.to_dict(serial=True)
         self.assertEqual(output['time'], instance.time.isoformat())
-        self.assertEqual(json.loads(instance.to_json())['time'],
+        self.assertEqual(json.decode(instance.to_json())['time'],
                          instance.time.isoformat())
 
     def test_model_add_field(self):
@@ -360,7 +360,7 @@ class ModelTestCase(unittest.TestCase):
 
     def test_model_late_assignment(self):
         instance = self.Person.from_dict(dict(name='Eric'))
-        self.assertEqual(instance.to_dict(), dict(name='Eric'))
+        self.assertEqual(instance.to_dict(), dict(name='Eric', age=0))
         instance.age = 18
         self.assertEqual(instance.to_dict(), self.data)
         instance.name = 'John'
