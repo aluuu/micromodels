@@ -368,7 +368,7 @@ class MXTimeDeltaField(BaseField):
 
     def to_serial(self, data):
         if isinstance(data, (int, float, DateTimeDeltaType, datetime.timedelta, basestring)):
-            return DateTimeDeltaFrom(data).ticks()
+            return DateTimeDeltaFrom(data).seconds
         elif isinstance(data, types.NoneType):
             return None
         raise TypeError("Cannot cast given value to mx.DateTimeDelta type")
