@@ -1,4 +1,6 @@
 import cjson as json
+import cPickle
+import base64
 
 from .fields import BaseField
 
@@ -92,9 +94,14 @@ class Model(object):
         instance.set_data(kwargs)
         return instance
 
-    def set_data(self, data, is_json=False):
+    def set_data(self, data, is_json=False, is_binary=False):
         if is_json:
             data = json.decode(data)
+
+        if is_binary:
+            data = cPickle.loads(base64.b64decode(data))
+            self = data
+            return
 
         if isinstance(data, self.__class__):
             data = data.to_dict()
@@ -143,14 +150,23 @@ class Model(object):
         '''
         return json.encode(self.to_dict(serial=True))
 
-    def loads(self, data):
+    def to_binary(self):
+        return base64.b64encode(cPickle.dumps(self))
+
+    def loads(self, data, binary=False):
         '''
         Makes restoring from JSON simplier.
         '''
-        self.set_data(data, is_json=True)
+        if binary:
+            self.set_data(data, is_binary=True)
+        else:
+            self.set_data(data, is_json=True)
 
-    def dumps(self):
+    def dumps(self, binary=False):
         '''
         Alias for :meth:`~micromodels.Model.to_json` method.
         '''
-        return self.to_json()
+        if binary:
+            return self.to_binary()
+        else:
+            return self.to_json()
