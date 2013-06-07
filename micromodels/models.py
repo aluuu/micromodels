@@ -100,7 +100,8 @@ class Model(object):
 
         if is_binary:
             data = cPickle.loads(base64.b64decode(data))
-            self = data
+            for key, field in data._clsfields.iteritems():
+                self.__dict__[key] = data.__dict__[key]
             return
 
         if isinstance(data, self.__class__):
