@@ -1,6 +1,8 @@
 import time
+from datetime import tzinfo
 import datetime
 import types
+import pytz
 from mx.DateTime import DateTimeType, DateTimeDeltaType, \
      DateTimeFrom, DateTimeDeltaFrom
 
@@ -341,10 +343,22 @@ class FieldCollectionField(BaseField):
 class MXDateTimeField(BaseField):
 
     def populate(self, data):
-        if isinstance(data, (int, float, DateTimeType, datetime.datetime, basestring)):
-            self.data = DateTimeFrom(data)
-        elif isinstance(data, types.NoneType):
+        if isinstance(data, types.NoneType):
             self.data = None
+        elif isinstance(data, datetime.datetime):
+            if data.tzinfo:
+                data = pytz.utc.normalize(data)
+            else:
+                data = pytz.utc.localize(data)
+            self.data = data
+        elif isinstance(data, (DateTimeType, basestring)):
+            data = DateTimeFrom(data).gmtime().pydatetime()
+            data = pytz.utc.localize(data)
+            self.data = data
+        elif isinstance(data, (int, float)):
+            data = datetime.datetime.utcfromtimestamp(data)
+            data = pytz.utc.localize(data)
+            self.data = data
         else:
             raise TypeError("Cannot cast given value to mx.DateTime type")
 
@@ -360,7 +374,7 @@ class MXTimeDeltaField(BaseField):
 
     def populate(self, data):
         if isinstance(data, (DateTimeDeltaType, datetime.timedelta, int, float)):
-            self.data =  DateTimeDeltaFrom(data)
+            self.data =  DateTimeDeltaFrom(data).pytimedelta()
         elif isinstance(data, types.NoneType):
             self.data = None
         else:
