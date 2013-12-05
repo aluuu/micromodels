@@ -365,7 +365,7 @@ class MXDateTimeField(BaseField):
 
     def to_serial(self, data):
         if isinstance(data, (datetime.datetime,)):
-            return calendar.timegm(data.utctimetuple)
+            return calendar.timegm(data.utctimetuple())
         elif isinstance(data, types.NoneType):
             return None
         raise TypeError("Cannot cast given value to mx.DateTime type")
