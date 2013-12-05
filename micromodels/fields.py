@@ -3,6 +3,7 @@ from datetime import tzinfo
 import datetime
 import types
 import pytz
+import calendar
 from mx.DateTime import DateTimeType, DateTimeDeltaType, \
      DateTimeFrom, DateTimeDeltaFrom
 
@@ -363,8 +364,8 @@ class MXDateTimeField(BaseField):
             raise TypeError("Cannot cast given value to mx.DateTime type")
 
     def to_serial(self, data):
-        if isinstance(data, (int, float, DateTimeType, datetime.datetime, basestring)):
-            return DateTimeFrom(data).ticks()
+        if isinstance(data, (datetime.datetime,)):
+            return calendar.timegm(data.utctimetuple)
         elif isinstance(data, types.NoneType):
             return None
         raise TypeError("Cannot cast given value to mx.DateTime type")
